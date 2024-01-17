@@ -179,7 +179,11 @@ Có thể xem toàn bộ tiêu chí [tại đây](./docs/CreditScore_save6_score
 <a id="6.2"></a>
 ### Threshold Tuning & Trade-off between loss & Coverage
 
-Mục tiêu là chia các khách hàng thành 8 nhóm khác nhau tương đương với 8 khoảng điểm tín dụng khác nhau, từ Blacklist đến Perfect Credt.
+Việc chọn ngưỡng để phân khách hàng vào các nhóm sẽ được các chuyên gia quyết định, trong đó có chỉ số của **FICO score** rất phổ biến
+
+![image1](./images/fico.png)
+
+Để thấy rõ hơn, tiến hành chia các khách hàng thành 8 nhóm khác nhau tương đương với **8 khoảng điểm tín dụng khác nhau, từ Blacklist đến Perfect Credt.**
 
 ![image1](./images/segmentation_description.png)
 

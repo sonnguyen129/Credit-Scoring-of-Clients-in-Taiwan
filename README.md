@@ -148,14 +148,14 @@ Việc tính PSI của các biến độc lập trong tập train và test để
 
 Với dữ liệu thu được sau xử lí, chúng ta sẽ sử dụng các model ML để so sánh hiệu suất dự đoán
 
-| Model  | AUC   | Type II  |  
+| Model  | AUC   | Type II (%)  |  
 |:---:|:---:|:---:|
-| Logistic Regression | 0.7741 | 8.95  |   
-| Random Forest  | 0.7512  | 11.68  |   
-| AdaBoost   |  0.7769 |  **8.28** |   
-| CatBoost   | 0.7282  | 13.97  |   
-| LightGBM   |  **0.7803** | 13.45  |   
-| XGBoost   |  0.7477 | 13.98  | 
+| Logistic Regression + WoE | 0.7805 | 9.27 |   
+| Random Forest  | 0.7729  | 11.79  |   
+| AdaBoost   |  0.7753 |  **8.23** |   
+| CatBoost   | 0.7696  | 13.41  |   
+| LightGBM   |  **0.7871** | 13.29  |   
+| XGBoost   |  0.7643 | 13.48  | 
 
 - Với bài toán Behavior Scoring, chúng ta nên chú trọng vào việc **giảm số lượng sai lầm loại II (FN)** mà mô hình phán đoán được. Những khách hàng thuộc sai lầm loại II về thực tế họ đã chưa thanh toán nhưng mô hình dự đoán những khách hàng này đã thanh toán theo đúng kỳ hạn. Xét theo góc độ tín dụng, nếu KH trả lãi không đủ và đúng hạn thì điểm tín dụng của KH sẽ thấp, nhảy nhóm nợ trên hệ thống tin tín dụng quốc gia CIC, điều này sẽ gây khó khăn cho các khoản vay tiếp theo của KH vì để có một CIC đẹp là người đã từng vay và trả lãi đúng hạn nên sai lầm loại II (FN) có tính chất nghiêm trọng hơn. Do đó, ngoài việc lựa chọn mô hình tốt, chúng ta cũng cần lựa chọn những mô hình có các TH thuộc sai lầm loại II là thấp nhất.
 - Dựa vào đồ thị trên kết hợp với confusion matrix của các mô hình đã huấn luyện ở trên thì mô hình LightGBM cho **AUC tốt nhất 78.03%** và mô hình AdaBoost có **số lượng sai lầm loại II thấp nhất 8.28%**. Ở đây chúng ta sẽ thấy mô hình **Logistic Regression** có AUC và Type II gần như không kém 2 mô hình trên quá nhiều mà có rất nhiều ưu điểm như mô hình rất dễ giải thích và đơn giản để có thể huấn luyện, kiểm thử, tinh chỉnh trong thời gian ngắn, do đó chọn mô hình **Logistic Regression** làm mô hình cuối cùng để áp dụng vào bài toán này!

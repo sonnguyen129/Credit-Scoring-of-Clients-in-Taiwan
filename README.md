@@ -15,7 +15,6 @@
 6. [Scorecard Pipeline](#6)
     - [Distribution Analysis](#6.1)
     - [Threshold Tuning & Trade-off between loss & Coverage](#6.2)
-    - [Inference pipline](#6.3)
 7. [Conclusion & Future works](#7)
 
 <a id="1"></a>
@@ -74,11 +73,16 @@ Có thể thấy số lượng khách hàng không thể thực hiện các than
 <a id="3.2"></a>
 ### Category
 
-Bộ dữ liệu này không có missing values và không có biến categorical nhưng thực tế có ba biến categorical đã được encoding `SEX`, `EDUCATION`, `MARRIAGE`
+Bộ dữ liệu này không có missing values và không có biến categorical nhưng thực tế có ba biến categorical đã được encoding `SEX`, `EDUCATION`, `MARRIAGE`, `PAY_X (X = 0, 2, 3, 4, 5, 6)`
 
 - SEX: Giới tính (1=male, 2=female)
 - EDUCATION: (1=graduate school, 2=university, 3=high school, 4=others, 5=unknown, 6=unknown)
 - MARRIAGE: Tình trạng hôn nhân (1=married, 2=single, 3=others)
+- PAY_X (X = 0, 2, 3, 4, 5, 6): Tình trạng thanh toán tháng (9, 8, 7, 6, 5, 4) năm 2005
+
+Sau khi làm sạch dữ liệu (chỉnh các dữ liệu nhâp lỗi, gom các dữ liệu categorical có số quan sát dưới 5% thành `Other`). Dữ liệu thu được dưới đây
+
+![image1](./images/data_distribution.png)
 
 <a id="4"></a>
 ## Feature Engineering
@@ -92,26 +96,36 @@ Tiếp theo tính **Information Value (IV)** của từng biến trong tập tra
 
 ![image1](./images/information_value.png)
 
-Trong thực tế, các biến có IV nhỏ hơn 0.02 sẽ bị loại. Từ đó, 2 biến `SEX` và `MARRIAGE` sẽ bị loại. Có thể thấy `PAY_0` có IV cao nhất. Điều này hợp lí vì biến thể hiện tình trạng thanh toán ở thời điểm gần với thời điểm cần dự đoán nhất
+Trong thực tế, các biến có IV nhỏ hơn 0.02 sẽ bị loại. Từ đó, 2 biến `SEX`, `MARRIAGE`, `BILL_AMT(1,2,3,4,5,6)` sẽ bị loại. Có thể thấy `PAY_0` có IV cao nhất. Điều này hợp lí vì biến thể hiện tình trạng thanh toán ở thời điểm gần với thời điểm cần dự đoán nhất
 
 <a id="4.2"></a>
 ### Feature Binning
 
-Sử dụng **Chi-square binning** và đảm bảo tỷ lệ mẫu tối thiểu (thông thường là **trên 5% và có dưới 70%**). Tuy nhiên quá trình chia các nhóm biến phù hợp cần phải tinh chỉnh nhiều lần để ra được kết quả phù hợp. Sau đây là quá trình thực hiện:
+Sử dụng **Percentile binning** và đảm bảo tỷ lệ mẫu tối thiểu (thông thường là **trên 5% và có dưới 70%**). Tuy nhiên quá trình chia các nhóm biến phù hợp cần phải tinh chỉnh nhiều lần để ra được kết quả phù hợp. Sau đây là quá trình thực hiện:
 
 - Tự động phân biến thành n nhóm ban đầu theo percentile (thường là băm 20 nhóm, theo phân vị 5% quan sát)
 - Dựa trên các nhóm giá trị đã được phân khoảng ở bước 1, nếu nhóm có tỷ lệ mẫu nhỏ hơn tỷ lệ mẫu tối thiểu quy định thì gộp với nhóm liền kề cho đến khi không còn nhóm nào không thỏa mãn tỷ lệ mẫu tối thiểu quy định
 - Dựa trên các nhóm giá trị thu được ở bước 2, tự động gộp các nhóm liền kề có tỷ lệ vỡ nợ tương tự vào với nhau, trong đó đảm bảo số lượng nhóm cuối cùng >=2
 
-Qua đó thu được ngưỡng phân chia các biến
-
-![image1](./images/binning_value.png)
+Các tiêu chí đánh giá các biến sau khi binning:
+- Tính trực quan – điều chỉnh giới hạn của mỗi nhóm thành số làm tròn.
+- Tính đơn điệu – đảm bảo rằng xu hướng của xác suất vỡ nợ tăng dần hoặc giảm dần một cách càng rõ ràng càng tốt, đồng thời thể hiện một xu hướng phù hợp với ý nghĩa kinh doanh thông thường. Trường hợp biến số sau khi nhóm không có xu hướng đơn điệu tăng/giảm sẽ xem xét loại (Loại biến Ushape giữ các biến dạng Monotonic).
+- Tỷ lệ mẫu tối thiểu– gộp các nhóm giá trị có số lượng mẫu quá ít không thỏa mãn tỷ lệ mẫu tối thiểu quy định (thông thường là trên 5% và có dưới 70% -tùy trường hợp điều chỉnh)
+- Ý nghĩa kinh doanh – gộp và phân chia các nhóm phù hợp với ý nghĩa kinh doanh, chính sách sản phẩm, phụ thuộc rất nhiều vào ý kiến xác nhận của chuyên gia Ngân hàng đã có nhiều năm kinh nghiệm trong thẩm định khách hàng, phê duyệt tín dụng, chính sách sản phẩm,...
 
 Dưới đây là đồ thị để kiểm tra từng nhóm biến (Ví dụ cho `LIMIT_BAL`, các biến khác cũng tương tự)
 
 ![image1](./images/binning_plot_1.png)
 
-Với Biểu đồ cột thể hiện tỷ lệ số lượng quan sát cho từng nhóm biến, biểu đồ đường thể hiện tỷ lệ khách hàng vỡ nợ cho từng nhóm biến.
+Đồ thị WoE qua các nhóm bin
+
+![image1](./images/binning_plot.png)
+
+Với biến categorical `PAY_0`
+
+![image1](./images/binning_plot_2.png)
+
+Nhận xét: 
 - Qua biểu đồ cột có thể thấy các bin đều **thỏa mãn yêu cầu sô lượng quan sát mỗi bin phải trong khoảng 5 - 70%**
 - Qua biểu đồ đường có thể thấy đảm bảo rằng **xu hướng của xác suất vỡ nợ có xu hướng giảm dần một cách càng rõ ràng**. Trong thực tế, biến số sau khi nhóm không có xu hướng đơn điệu tăng/giảm sẽ xem xét loại.
 
@@ -172,14 +186,14 @@ Mục tiêu là chia các khách hàng thành 8 nhóm khác nhau tương đươn
 Từ đây chúng ta sẽ tinh chỉnh từng khoảng điểm tín dụng cho phù hợp nhất với mỗi nhóm và nhận được **bảng Loss & Coverage** cho từng bậc
 
 ```
-Level 8: Loss is  0.043478260869565216 ; Coverage is  0.11825970099109692
-Level 7-Level 8: Loss is  0.0587467362924282 ; Coverage is  0.3633462119939526
-Level 6-Level 8: Loss is  0.1001628664495114 ; Coverage is  0.7424827817906937
-Level 5-Level 8: Loss is  0.12083762444215586 ; Coverage is  0.8604065177221569
-Level 4-Level 8: Loss is  0.1396957123098202 ; Coverage is  0.9403662019150009
-Level 3-Level 8: Loss is  0.16920883820384888 ; Coverage is  0.9790021837728876
-Level 2-Level 8: Loss is  0.19371086305472365 ; Coverage is  0.9949605241054931
-Level 1-Level 8: Loss is  0.2017732401934444 ; Coverage is  0.9981521921720141
+Level 8: Loss is  0.05405405405405406 ; Coverage is  0.11758777087182933
+Level 7-Level 8: Loss is  0.06246450880181715 ; Coverage is  0.2773391567277003
+Level 6-Level 8: Loss is  0.08287866978435958 ; Coverage is  0.5929783302536537
+Level 5-Level 8: Loss is  0.11315933564519073 ; Coverage is  0.8162271123803124
+Level 4-Level 8: Loss is  0.1279947489333771 ; Coverage is  0.8926591634470015
+Level 3-Level 8: Loss is  0.1480927449513837 ; Coverage is  0.9566605073072401
+Level 2-Level 8: Loss is  0.17300891215164804 ; Coverage is  0.9820258693095918
+Level 1-Level 8: Loss is  0.18430176119816946 ; Coverage is  0.9880732403830002
 Level 0-Level 8: Loss is  0.20637248366884414 ; Coverage is  1.0
 ```
 
@@ -193,56 +207,12 @@ Total default customer: 1548
 Từ bảng tổng kết trên có thể thấy:
 
 - Nếu cho toàn bộ khách hàng vay tiền (từ bậc 0 đến 8) thì tỷ lệ sai sót là **tổng khách hàng vợ nợ / tổng khách hàng (1548/7501) ~ 21%**
-- Giả sử sếp yêu cầu có thể cho **tối đa 70% khách hàng nộp hồ sơ được vay tiền và chấp nhận một chút rủi ro là khoảng 10%** thì nên cho các **khách hàng từ bậc 6 trở lên** do tỷ lệ sai sót là (357 + 103 + 32)/(2614 + 1562 + 736) = 10.01% với số lượng khách hàng được vay là (2614 + 1562 + 736)/ (tổng khách hàng nộp hồ sơ) là 65.48%
-
-<a id="6.3"></a>
-### Inference pipline
-
-Chọn 1 khách hàng trong tập test
-
-```
-ID                    22500.000000
-LIMIT_BAL            420000.000000
-SEX                       2.000000
-EDUCATION                 2.000000
-MARRIAGE                  1.000000
-AGE                      37.000000
-PAY_0                     0.000000
-PAY_2                     0.000000
-PAY_3                     0.000000
-PAY_4                     0.000000
-PAY_5                     0.000000
-PAY_6                     0.000000
-BILL_AMT1             36032.000000
-BILL_AMT2             41932.000000
-BILL_AMT3              9778.000000
-BILL_AMT4            158901.000000
-BILL_AMT5            161876.000000
-BILL_AMT6            165378.000000
-PAY_AMT1               7022.000000
-PAY_AMT2               1846.000000
-PAY_AMT3             163862.000000
-PAY_AMT4               6000.000000
-PAY_AMT5               6000.000000
-PAY_AMT6               6000.000000
-target                    0.000000
-CreditScore             745.026339
-CreditScore_level         8.000000
-Name: 0, dtype: float64
-```
-
-Kết quả thu được
-```
-card.predict(df_test)[0]
->>> 745.0263390798293
-```
-
-Theo phân loại trên thì khách hàng này thuộc **bậc 8 (Perfect Credit)**. Khách hàng xứng đáng được cho vay.
+- Giả sử sếp yêu cầu có thể cho **tối đa 70% khách hàng nộp hồ sơ được vay tiền và chấp nhận một chút rủi ro là khoảng 10%** thì nên cho các **khách hàng từ bậc 6 trở lên** do tỷ lệ sai sót là (40 + 70 + 209 + 301)/(1630 + 2088 + 1021 + 740) = 11.01% với số lượng khách hàng được vay là (1630 + 2088 + 1021 + 740)/ (tổng khách hàng nộp hồ sơ) là 73.04%
 
 <a id="7"></a>
 ## Conclusion & Future works
 
-Sử dụng thêm deep learning model như neural network, TabNet, NODE,... và khai thác thêm nhiều biến để cải thiện hiệu suất dự đoán và giúp tăng false positive rate để khách hàng hài lòng hơn
+Khai thác thêm nhiều biến để cải thiện hiệu suất dự đoán và giúp tăng false positive rate để khách hàng hài lòng hơn
 
 
 

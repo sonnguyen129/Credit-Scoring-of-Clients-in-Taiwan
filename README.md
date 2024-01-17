@@ -207,7 +207,7 @@ Total default customer: 1548
 Từ bảng tổng kết trên có thể thấy:
 
 - Nếu cho toàn bộ khách hàng vay tiền (từ bậc 0 đến 8) thì tỷ lệ sai sót là **tổng khách hàng vợ nợ / tổng khách hàng (1548/7501) ~ 21%**
-- Giả sử sếp yêu cầu có thể cho **tối đa 70% khách hàng nộp hồ sơ được vay tiền và chấp nhận một chút rủi ro là khoảng 10%** thì nên cho các **khách hàng từ bậc 6 trở lên** do tỷ lệ sai sót là (40 + 70 + 209 + 301)/(1630 + 2088 + 1021 + 740) = 11.01% với số lượng khách hàng được vay là (1630 + 2088 + 1021 + 740)/ (tổng khách hàng nộp hồ sơ) là 73.04%
+- Giả sử sếp yêu cầu có thể cho **tối đa 75% khách hàng nộp hồ sơ được vay tiền và chấp nhận một chút rủi ro là khoảng 10%** thì nên cho các **khách hàng từ bậc 6 trở lên** do tỷ lệ sai sót là (40 + 70 + 209 + 301)/(1630 + 2088 + 1021 + 740) = 11.01% với số lượng khách hàng được vay là (1630 + 2088 + 1021 + 740)/ (tổng khách hàng nộp hồ sơ) là 73.04%
 
 <a id="7"></a>
 ## Conclusion & Future works
